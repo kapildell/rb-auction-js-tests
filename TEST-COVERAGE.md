@@ -49,7 +49,7 @@ This document maps the Test Automation Home Assignment requirements to the autom
 | A2.2 — Yard details | Covered | Checks Edmonton, street/city/postal address, phone, and pickup-hour values. |
 | A2.3 — Upcoming events | Covered | Requires events, then checks every event has start/end date fields and a name, and at least one refers to Edmonton or Nisku. |
 | A2.4 — Items-in-yard categories | Covered | Flattens nested category arrays; checks count, each category name, optional numeric non-negative `totalAssets`, and Excavators. |
-| API 3 / A3.1 — Search response HTTP 200 and JSON | Covered | “API 3 - Edmonton inventory search API” checks status and JSON content type after a same-origin browser request. |
+| API 3 / A3.1 — Search response HTTP 200 and JSON | Partial | “API 3 - Edmonton inventory search API” checks status and JSON content type after a same-origin browser request. A direct API request has returned HTTP 403, but this behavior is not yet covered by a dedicated test. |
 | A3.2 — Full hit count is positive | Covered | Reads `results.totalAmount` and checks greater than zero without paging through all lots. |
 | A3.3 — First page and display names | Covered | Requires records and schema-valid `assetDescription` values. |
 | A3.4 — Log count and first five titles | Covered | Logs `totalAmount` and up to the first five `assetDescription` values. |
@@ -87,6 +87,7 @@ The following stated requirements are not fully validated by the current tests:
 - **A1.5:** Satellite/permanent totals are checked, but the schema and loop do not require every location to have a recognized site type.
 - **A1.6:** The distinct-country threshold is checked, but United States and Canada are not explicitly required in the distinct-country set.
 - **A2.1:** The `__NEXT_DATA__` script is parsed as JSON, but the page response content type is not explicitly asserted.
+- **API 3 — Direct search API access:** The happy-path test calls `/api/search` from the loaded search page using a same-origin browser request because a direct API request returned HTTP 403. The direct-call 403 behavior is not currently asserted by a dedicated test.
 
 ### Negative API expectation requiring server-side behavior
 
@@ -97,6 +98,7 @@ The following stated requirements are not fully validated by the current tests:
 To close the gaps above:
 
 1. Add the missing E2E title, Canada grouping, event-title/date-per-card, carousel quantity/name, representative contact/territory, and search-result assertions.
-2. Strengthen API 1 assertions for location type and Edmonton/Phoenix country assignments, and explicitly check United States and Canada in the country set.
-3. Add explicit HTTP/content-type assertions to page-JSON API 1 and API 2.
-4. Resolve API 5 with the API owner: the public search endpoint accepted `1=1` with HTTP 200, so this client test can detect the behavior but cannot enforce server-side query rejection.
+2. Add a dedicated API 3 test for direct `/api/search` requests, asserting the observed HTTP 403 response, while retaining the same-origin happy-path test.
+3. Strengthen API 1 assertions for location type and Edmonton/Phoenix country assignments, and explicitly check United States and Canada in the country set.
+4. Add explicit HTTP/content-type assertions to page-JSON API 1 and API 2.
+5. Resolve API 5 with the API owner: the public search endpoint accepted `1=1` with HTTP 200, so this client test can detect the behavior but cannot enforce server-side query rejection.
