@@ -56,6 +56,8 @@ The tests use `https://www.rbauction.com` as the base URL, configured in [`playw
 
 API response schemas are maintained separately in [`tests/api/schemas/`](./tests/api/schemas/).
 
+See the requirement-by-requirement [test coverage mapping](./TEST-COVERAGE.md) for coverage status and known gaps.
+
 ## Reports and artifacts
 
 Playwright uses the list and HTML reporters. To open the most recent HTML report:
