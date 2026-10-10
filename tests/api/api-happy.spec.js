@@ -1,4 +1,16 @@
 const { test, expect } = require('@playwright/test');
+const Ajv = require('ajv');
+const locationsSchema = require('./schemas/auction-sites.schema.json');
+const edmontonYardPageSchema = require('./schemas/edmonton-yard-page.schema.json');
+const inventorySearchSchema = require('./schemas/inventory-search.schema.json');
+
+const ajv = new Ajv({ allErrors: true });
+
+function expectSchema(data, schema, description) {
+  const validate = ajv.compile(schema);
+  const isValid = validate(data);
+  expect(isValid, `${description} schema errors: ${ajv.errorsText(validate.errors)}`).toBe(true);
+}
 
 async function fetchNextData(request, path) {
   const response = await request.get(path);
@@ -16,6 +28,7 @@ test.describe('API Happy Path Suite', () => {
     const pageProps = nextData.props.pageProps;
     const locations = pageProps.locations || pageProps.yards || pageProps.initialState?.locations || [];
 
+    expectSchema(locations, locationsSchema, 'Auction locations');
     expect(Array.isArray(locations)).toBeTruthy();
     expect(locations.length).toBeGreaterThan(60);
 
@@ -47,6 +60,23 @@ test.describe('API Happy Path Suite', () => {
     expect(countries.size).toBeGreaterThan(8);
   });
 
+  test('API 4 - Supported locales are configured in page JSON', async ({ request }) => {
+    const nextData = await fetchNextData(request, '/lp');
+    expect(nextData.locales).toEqual(expect.any(Array));
+    expect(nextData.locales.length).toBeGreaterThan(0);
+    expect(new Set(nextData.locales).size).toBe(nextData.locales.length);
+    expect(nextData.locales).toContain(nextData.defaultLocale);
+
+    expect(nextData.domainLocales).toEqual(expect.any(Array));
+    const mappedLocales = nextData.domainLocales.map(domainLocale => domainLocale.defaultLocale);
+    expect(new Set(mappedLocales).size).toBe(mappedLocales.length);
+    expect(mappedLocales.sort()).toEqual([...nextData.locales].sort());
+    for (const domainLocale of nextData.domainLocales) {
+      expect(domainLocale.domain).toMatch(/^[\w.-]+$/);
+      expect(nextData.locales).toContain(domainLocale.defaultLocale);
+    }
+  });
+
   test('API 2 - Edmonton yard page JSON', async ({ request }) => {
     const nextData = await fetchNextData(request, '/lp/edmonton-ab');
     expect(nextData).toEqual(expect.objectContaining({
@@ -56,6 +86,7 @@ test.describe('API Happy Path Suite', () => {
     }));
 
     const pageProps = nextData.props.pageProps;
+    expectSchema(pageProps, edmontonYardPageSchema, 'Edmonton yard page data');
     const yardDetails = pageProps.yardDetails;
     expect(yardDetails.name).toMatch(/Edmonton/i);
     expect(yardDetails.address.addressLine1).toContain('1500 Sparrow Drive');
@@ -124,6 +155,7 @@ test.describe('API Happy Path Suite', () => {
     expect(response.status).toBe(200);
     expect(response.contentType).toMatch(/application\/json/i);
     const body = JSON.parse(response.body);
+    expectSchema(body, inventorySearchSchema, 'Edmonton inventory search response');
     const results = body.results;
     const totalAmount = results.totalAmount;
     expect(totalAmount).toBeGreaterThan(0);

@@ -143,4 +143,23 @@ test.describe('E2E Happy Path Scenarios', () => {
     }
   });
 
+  test('Scenario 5 - All supported locale sites', async ({ page }) => {
+    test.setTimeout(180000);
+    await page.goto('/lp', { waitUntil: 'domcontentloaded' });
+    const nextData = await page.locator('#__NEXT_DATA__').evaluate(element => JSON.parse(element.textContent));
+    const locales = nextData.locales;
+    const domainLocales = nextData.domainLocales;
+
+    expect(locales).toContain(nextData.defaultLocale);
+    expect(domainLocales.map(domainLocale => domainLocale.defaultLocale).sort()).toEqual([...locales].sort());
+
+    for (const domainLocale of domainLocales) {
+      const response = await page.goto(`https://${domainLocale.domain}/lp`, {
+        waitUntil: 'domcontentloaded'
+      });
+      expect(response?.status(), `${domainLocale.domain} should load successfully`).toBe(200);
+      await expect(page.locator('html')).toHaveAttribute('lang', domainLocale.defaultLocale);
+    }
+  });
+
 });

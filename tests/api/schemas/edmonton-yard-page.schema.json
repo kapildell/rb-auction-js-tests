@@ -1,0 +1,79 @@
+{
+  "type": "object",
+  "required": ["yardDetails", "upcomingEvents", "itemsInYard"],
+  "properties": {
+    "yardDetails": {
+      "type": "object",
+      "required": ["name", "address", "contactPhone", "pickupHoursFrom", "pickupHoursTo"],
+      "properties": {
+        "name": { "type": "string" },
+        "address": {
+          "type": "object",
+          "required": ["addressLine1", "city", "zipPostalCode"],
+          "properties": {
+            "addressLine1": { "type": "string" },
+            "city": { "type": "string" },
+            "zipPostalCode": { "type": "string" }
+          }
+        },
+        "contactPhone": { "type": "string" },
+        "pickupHoursFrom": { "type": "string" },
+        "pickupHoursTo": { "type": "string" }
+      }
+    },
+    "upcomingEvents": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "event_start_date": { "type": "string" },
+          "date_of_event": { "type": "string" },
+          "bidding_end_time": { "type": "string" },
+          "event_end_date": { "type": "string" },
+          "event_advertised_name": { "type": "string" },
+          "name": { "type": "string" },
+          "title": { "type": "string" }
+        },
+        "anyOf": [
+          { "required": ["event_start_date"] },
+          { "required": ["date_of_event"] }
+        ],
+        "allOf": [
+          {
+            "anyOf": [
+              { "required": ["bidding_end_time"] },
+              { "required": ["event_end_date"] }
+            ]
+          },
+          {
+            "anyOf": [
+              { "required": ["event_advertised_name"] },
+              { "required": ["name"] },
+              { "required": ["title"] }
+            ]
+          }
+        ]
+      }
+    },
+    "itemsInYard": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["categories"],
+        "properties": {
+          "categories": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["categoryLocalized"],
+              "properties": {
+                "categoryLocalized": { "type": "string", "minLength": 1 },
+                "totalAssets": { "type": "number", "minimum": 0 }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

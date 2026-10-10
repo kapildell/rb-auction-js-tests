@@ -45,13 +45,16 @@ npx playwright test tests/api/api-negative.spec.js
 ## Coverage
 
 - **Locations directory:** verifies the Locations heading and introduction, satellite-site note, country groups, US and Canadian site counts and cities, satellite/permanent totals, known site types, and the local-representatives control.
+- **Locales:** verifies the API payload lists every supported locale and maps each locale to a domain; the E2E suite visits every configured locale domain and validates its document language.
 - **Edmonton yard:** checks the yard address, office hours, phone, auction events, yard information, inventory categories, seller contact section, and representatives.
 - **Inventory search:** checks the Edmonton search result count and that returned cards have titles.
-- **API happy paths:** validates auction-site data from `/lp`, Edmonton yard details/events/categories from `/lp/edmonton-ab`, and Edmonton inventory search results from `POST /api/search`.
-- **API negative paths:** verifies an unknown site is absent, an invalid yard slug does not return Edmonton details, and a no-exact-match inventory query displays the appropriate response.
+- **API happy paths:** validates auction-site data from `/lp`, Edmonton yard details/events/categories from `/lp/edmonton-ab`, and Edmonton inventory search results from `POST /api/search`. AJV schemas validate the expected structures and required fields for all three payloads.
+- **API negative paths:** verifies malformed response data fails the API schemas (wrong field types and invalid array items), an unknown site is absent, an invalid yard slug does not return Edmonton details, unmatched search behavior, accented/reserved search characters, and SQL-like `1=1` text handling.
 - **E2E negative paths:** verifies unknown countries and sites are absent, invalid yard slugs do not show Edmonton details, and unmatched searches show the no-exact-match message.
 
 The tests use `https://www.rbauction.com` as the base URL, configured in [`playwright.config.js`](./playwright.config.js). The Chromium project is configured to run in headed mode.
+
+API response schemas are maintained separately in [`tests/api/schemas/`](./tests/api/schemas/).
 
 ## Reports and artifacts
 

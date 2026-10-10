@@ -1,0 +1,50 @@
+{
+  "type": "array",
+  "minItems": 1,
+  "items": {
+    "type": "object",
+    "properties": {
+      "name": { "type": "string" },
+      "cityName": { "type": "string" },
+      "country": { "type": "string" },
+      "countryName": { "type": "string" },
+      "countryCode": { "type": "string" },
+      "address": {
+        "type": "object",
+        "properties": {
+          "country": { "type": "string" },
+          "countryName": { "type": "string" },
+          "countryCode": { "type": "string" }
+        }
+      }
+    },
+    "allOf": [
+      {
+        "anyOf": [
+          { "required": ["name"] },
+          { "required": ["cityName"] }
+        ]
+      },
+      {
+        "anyOf": [
+          { "required": ["country"] },
+          { "required": ["countryName"] },
+          { "required": ["countryCode"] },
+          {
+            "required": ["address"],
+            "properties": {
+              "address": {
+                "type": "object",
+                "anyOf": [
+                  { "required": ["country"] },
+                  { "required": ["countryName"] },
+                  { "required": ["countryCode"] }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    ]
+  }
+}
